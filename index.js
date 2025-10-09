@@ -34,8 +34,9 @@ app.use(limiter);
 
 // Mount routes
 app.use("/api/auth", authRouter);
-
 app.use('/api/customer', customerRoutes);
+app.use("/api/wishlist", wishlistRoutes);
+
 
 // Checking is API live
 app.get("/", (req, res) => {

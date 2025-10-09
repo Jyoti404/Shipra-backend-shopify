@@ -10,8 +10,7 @@ const {
 const { protect, authorizeRole } = require("../middlewares/authMiddleware");
 
 // All routes protected for buyers only
-router.use(protect, authorizeRole("buyer"));
-
+router.use(protect);
 router.post("/", addToWishlist);
 router.get("/", getWishlist);
 router.delete("/:productId", removeFromWishlist);
