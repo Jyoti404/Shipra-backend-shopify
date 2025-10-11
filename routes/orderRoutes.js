@@ -1,36 +1,14 @@
-// // server/routes/orderRoutes.js
-
-// const express = require("express");
-// const router = express.Router();
-// const { placeOrder, getUserOrders ,updateOrderStatus } = require("../controllers/orderController");
-// const { protect, authorizeRole } = require("../middlewares/authMiddleware");
-
-// // Place an order from cart
-// router.post("/", protect, authorizeRole("buyer"), placeOrder);
-
-// // Get user's orders
-// router.get("/", protect, authorizeRole("buyer"), getUserOrders);
-
-// // Seller route: update order status
-// router.put(
-//   "/:orderId/status",
-//   protect,
-//   authorizeRole("seller"),
-//   updateOrderStatus
-// );
-// module.exports = router;
-
 const express = require('express');
 const router = express.Router();
 const fetch = require('node-fetch'); // or global fetch if Node 18+
-const { ensureAuth } = require('../middlewares/authMiddleware'); // Your auth middleware
+const { authenticateToken } = require('../middlewares/authMiddleware'); // Change this
 
 const SHOP_DOMAIN = process.env.SHOP_DOMAIN;
 const STOREFRONT_ACCESS_TOKEN = process.env.STOREFRONT_ACCESS_TOKEN;
 
-router.get('/customer/orders', ensureAuth, async (req, res) => {
-  const customerAccessToken = req.user.token; // From your auth middleware
-  const first = req.query.first || 2;
+router.get('/customer/orders', authenticateToken, async (req, res) => { // Change ensureAuth to authenticateToken
+  const customerAccessToken = req.user.shopifyToken; // Change from req.user.token to req.user.shopifyToken
+  const first = parseInt(req.query.first) || 2;
 
   const query = `
     query getCustomerOrders($customerAccessToken: String!, $first: Int!) {
