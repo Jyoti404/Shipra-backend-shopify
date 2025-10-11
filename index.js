@@ -14,7 +14,6 @@ const goaffproRoutes = require("./routes/goaffpro"); // GoAffPro routes
 const delhiveryRoutes = require("./routes/delhiveryRoutes"); // delhivery routes
 const customerRoutes = require('./routes/customerRoutes');
 const feedbackRoutes = require("./routes/feedbackRoutes");
-const orderRoutes = require('./routes/orderRoutes');
 
 dotenv.config();
 const app = express();
