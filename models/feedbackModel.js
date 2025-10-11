@@ -8,7 +8,7 @@ const feedbackSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    enum: ["address", "delivery", "affiliate", "payment", "product", "other", null],
+    enum: ["address", "delivery", "affiliate", "payment", "product", "return", "feature", "other", null],
     default: null,
   },
   message: {
