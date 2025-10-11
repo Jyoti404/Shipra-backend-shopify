@@ -23,7 +23,7 @@
 const express = require('express');
 const router = express.Router();
 const fetch = require('node-fetch'); // or global fetch if Node 18+
-const { ensureAuth } = require('../middleware/auth'); // Your auth middleware
+const { ensureAuth } = require('../middleware/authMiddleware'); // Your auth middleware
 
 const SHOP_DOMAIN = process.env.SHOP_DOMAIN;
 const STOREFRONT_ACCESS_TOKEN = process.env.STOREFRONT_ACCESS_TOKEN;
