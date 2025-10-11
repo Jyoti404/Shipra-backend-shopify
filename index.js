@@ -36,6 +36,7 @@ app.use(limiter);
 app.use("/api/auth", authRouter);
 app.use('/api/customer', customerRoutes);
 app.use("/api/wishlist", wishlistRoutes);
+app.use('/api/feedback', feedbackRoutes);
 
 
 // Checking is API live
