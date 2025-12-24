@@ -16,12 +16,6 @@ wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
 module.exports = mongoose.model('User', userSchema);
 
 
-<<<<<<< HEAD
-
-
-
-=======
->>>>>>> 91e0fb2 (Fixing Login)
 // const mongoose = require("mongoose");
 
 // const userSchema = new mongoose.Schema(
