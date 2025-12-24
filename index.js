@@ -5,18 +5,15 @@ const cors = require("cors");
 const rateLimit = require("express-rate-limit");
 
 const authRouter = require("./routes/authRoutes");
-const productRoutes = require("./routes/productRoutes");
-const cartRoutes = require("./routes/cartRoutes");
+// const productRoutes = require("./routes/productRoutes");
+// const cartRoutes = require("./routes/cartRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const wishlistRoutes = require("./routes/wishlistRoutes")
-const shopifyRoutes = require("./routes/shopifyRoutes"); // shopify routes
-const goaffproRoutes = require("./routes/goaffpro"); // GoAffPro routes
-const delhiveryRoutes = require("./routes/delhiveryRoutes"); // delhivery routes
+// const shopifyRoutes = require("./routes/shopifyRoutes"); // shopify routes
+// const goaffproRoutes = require("./routes/goaffpro"); // GoAffPro routes
+// const delhiveryRoutes = require("./routes/delhiveryRoutes"); // delhivery routes
 const customerRoutes = require('./routes/customerRoutes');
-<<<<<<< HEAD
 const feedbackRoutes = require("./routes/feedbackRoutes");
-=======
->>>>>>> 91e0fb2 (Fixing Login)
 
 dotenv.config();
 const app = express();
@@ -38,16 +35,11 @@ app.use(limiter);
 
 // Mount routes
 app.use("/api/auth", authRouter);
-<<<<<<< HEAD
 app.use('/api/customer', customerRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/orders', orderRoutes); 
 
-=======
-
-app.use('/api/customer', customerRoutes);
->>>>>>> 91e0fb2 (Fixing Login)
 
 // Checking is API live
 app.get("/", (req, res) => {
