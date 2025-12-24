@@ -53,6 +53,10 @@ exports.createOrder = async (req, res) => {
  * Signature generation on frontend result to be matched here:
  *  hmac = sha256(order_id + "|" + payment_id, KEY_SECRET)
  */
+<<<<<<< HEAD
+=======
+
+>>>>>>> 91e0fb2 (Fixing Login)
 exports.verifyPayment = async (req, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
