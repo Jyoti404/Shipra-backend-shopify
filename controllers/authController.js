@@ -2,9 +2,8 @@ const { Resend } = require("resend");
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 const Otp = require("../models/Otp");
-const { getCustomerByEmail } = require("../utils/shopifyApi");
+const {createCustomer, getCustomerByEmail } = require("../utils/shopifyApi");
 // const { generateShopifyCustomerToken } = require('../utils/helper');
-
 
 // Initialize Resend
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -53,7 +52,7 @@ const sendOtp = async (req, res) => {
 };
 
 
-// Verify OTP and login/register user
+// Verify OTP and login/register user - older
 // const verifyOtp = async (req, res) => {
 //   try {
 //     const { email, otp } = req.body;
@@ -75,11 +74,11 @@ const sendOtp = async (req, res) => {
 
 //     otpStore.delete(email);
 
-    // STEP 1: Check MongoDB
+//     STEP 1: Check MongoDB
 //     let user = await User.findOne({ email });
 
 //     if (!user) {
-      // STEP 2: Check Shopify
+//       STEP 2: Check Shopify
 //       let shopifyCustomer = await getCustomerByEmail(email);
 
 //       if (shopifyCustomer) {
@@ -109,18 +108,18 @@ const sendOtp = async (req, res) => {
 //       }
 //     }
 
-    // STEP 3: Generate JWT
+//     STEP 3: Generate JWT
 //     const token = jwt.sign(
 //       { id: user._id, email: user.email, role: user.role },
 //       process.env.JWT_SECRET || "fallback_secret_do_change",
 //       { expiresIn: process.env.JWT_EXPIRY || "1h" }
 //     );
 
-   // STEP 4: Generate Shopify Token
+//    STEP 4: Generate Shopify Token
 // let shopifyCustomerToken = null;
 // if (user.shopifyCustomerId) {
 //   if (!user.shopifyPassword) {
-    // Generate random password for first-time Shopify customer
+//     Generate random password for first-time Shopify customer
 //     const randomPassword = Math.random().toString(36).slice(-12);
 //     user.shopifyPassword = randomPassword;
 //     await user.save();
@@ -130,7 +129,7 @@ const sendOtp = async (req, res) => {
 // }
 
 
-    // STEP 5: Send both JWT and Shopify token
+//     STEP 5: Send both JWT and Shopify token
 //     return res.json({
 //     message: "OTP verified successfully",
 //     token, // Your JWT token
@@ -148,11 +147,95 @@ const sendOtp = async (req, res) => {
   
 // };
 
+// old
+// const verifyOtp = async (req, res) => {
+//   try {
+//     console.log(req.body);
 
+//     /* ---------- INPUT ---------- */
+//     const email = req.body?.email?.toLowerCase()?.trim();
+//     const otp = req.body?.otp?.toString()?.trim();
+
+//     if (!email || !otp) {
+//       return res.status(400).json({ error: "Email and OTP are required" });
+//     }
+
+//     /* ---------- OTP ---------- */
+//     const otpRecord = await Otp.findOne({ email });
+
+//     if (!otpRecord) {
+//       return res.status(400).json({ error: "OTP expired or not requested" });
+//     }
+
+//     if (otpRecord.otp !== otp) {
+//       return res.status(400).json({ error: "Invalid OTP" });
+//     }
+
+//    // OTP used → delete it
+//     await Otp.deleteOne({ _id: otpRecord._id });
+
+//     /* ---------- USER ---------- */
+//     let user = await User.findOne({ email });
+
+//     if (!user) {
+//       let shopifyCustomer = null;
+
+//       try {
+//         shopifyCustomer = await getCustomerByEmail(email);
+//       } catch (err) {
+//         console.error("⚠️ Shopify lookup failed:", err.message);
+//       }
+
+//       const userPayload = {
+//         email,
+//         name: "",
+//         phone: null,
+//         address: null,
+//         shopifyCustomerId: null,
+//       };
+
+//       if (shopifyCustomer) {
+//         userPayload.name =
+//           `${shopifyCustomer.first_name || ""} ${shopifyCustomer.last_name || ""}`.trim();
+//         userPayload.phone = shopifyCustomer.phone || null;
+//         userPayload.address =
+//           shopifyCustomer.default_address?.address1 ||
+//           shopifyCustomer.default_address?.city ||
+//           null;
+//         userPayload.shopifyCustomerId = shopifyCustomer.id || null;
+//       }
+
+//       user = await User.create(userPayload);
+//     }
+
+//     /* ---------- JWT ---------- */
+//     const token = jwt.sign(
+//       { _id: user._id, email: user.email, role: user.role },
+//       process.env.JWT_SECRET,
+//       { expiresIn: "1d" }
+//     );
+
+//     /* ---------- RESPONSE ---------- */
+//     return res.json({
+//       message: "OTP verified successfully",
+//       token,
+//       user: {
+//         id: user._id,
+//         email: user.email,
+//         name: user.name || "User",
+//         shopifyCustomerId: user.shopifyCustomerId || null,
+//       },
+//     });
+
+//   } catch (err) {
+//     console.error("🔥 verifyOtp fatal crash:", err);
+//     return res.status(500).json({ error: "Internal server error" });
+//   }
+// };
+
+// new 
 const verifyOtp = async (req, res) => {
   try {
-    console.log(req.body);
-
     /* ---------- INPUT ---------- */
     const email = req.body?.email?.toLowerCase()?.trim();
     const otp = req.body?.otp?.toString()?.trim();
@@ -161,7 +244,7 @@ const verifyOtp = async (req, res) => {
       return res.status(400).json({ error: "Email and OTP are required" });
     }
 
-    /* ---------- OTP ---------- */
+    /* ---------- OTP VALIDATION ---------- */
     const otpRecord = await Otp.findOne({ email });
 
     if (!otpRecord) {
@@ -172,48 +255,61 @@ const verifyOtp = async (req, res) => {
       return res.status(400).json({ error: "Invalid OTP" });
     }
 
-   // OTP used → delete it
     await Otp.deleteOne({ _id: otpRecord._id });
 
-    /* ---------- USER ---------- */
+    /* ---------- USER (MongoDB) ---------- */
     let user = await User.findOne({ email });
 
-    if (!user) {
-      let shopifyCustomer = null;
+    /* ---------- SHOPIFY CUSTOMER (ALWAYS ENSURED) ---------- */
+    let shopifyCustomer = null;
 
-      try {
-        shopifyCustomer = await getCustomerByEmail(email);
-      } catch (err) {
-        console.error("⚠️ Shopify lookup failed:", err.message);
-      }
+    try {
+      shopifyCustomer = await getCustomerByEmail(email);
+    } catch (err) {
+      console.error("⚠️ Shopify lookup failed:", err.message);
+    }
 
-      const userPayload = {
+    // 🔑 CRITICAL FIX: create Shopify customer if missing
+    if (!shopifyCustomer) {
+      shopifyCustomer = await createCustomer({
         email,
-        name: "",
-        phone: null,
-        address: null,
-        shopifyCustomerId: null,
-      };
+        firstName: "",
+        lastName: "",
+        tags: ["app-user"],
+      });
+    }
 
-      if (shopifyCustomer) {
-        userPayload.name =
-          `${shopifyCustomer.first_name || ""} ${shopifyCustomer.last_name || ""}`.trim();
-        userPayload.phone = shopifyCustomer.phone || null;
-        userPayload.address =
+    /* ---------- CREATE / UPDATE USER ---------- */
+    if (!user) {
+      user = await User.create({
+        email,
+        name: `${shopifyCustomer.first_name || ""} ${shopifyCustomer.last_name || ""}`.trim(),
+        phone: shopifyCustomer.phone || null,
+        address:
           shopifyCustomer.default_address?.address1 ||
           shopifyCustomer.default_address?.city ||
-          null;
-        userPayload.shopifyCustomerId = shopifyCustomer.id || null;
+          null,
+        shopifyCustomerId: shopifyCustomer.id,
+        role: "buyer",
+      });
+    } else {
+      // 🛡️ Backfill missing Shopify ID (very important)
+      if (!user.shopifyCustomerId) {
+        user.shopifyCustomerId = shopifyCustomer.id;
+        await user.save();
       }
-
-      user = await User.create(userPayload);
     }
 
     /* ---------- JWT ---------- */
     const token = jwt.sign(
-      { _id: user._id, email: user.email, role: user.role },
+      {
+        id: user._id,
+        email: user.email,
+        role: user.role,
+        shopifyCustomerId: user.shopifyCustomerId,
+      },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" }
+      { expiresIn: "7d" }
     );
 
     /* ---------- RESPONSE ---------- */
@@ -224,16 +320,15 @@ const verifyOtp = async (req, res) => {
         id: user._id,
         email: user.email,
         name: user.name || "User",
-        shopifyCustomerId: user.shopifyCustomerId || null,
+        shopifyCustomerId: user.shopifyCustomerId,
       },
     });
 
   } catch (err) {
-    console.error("🔥 verifyOtp fatal crash:", err);
+    console.error("🔥 verifyOtp error:", err);
     return res.status(500).json({ error: "Internal server error" });
   }
 };
-
 
 module.exports = {
   sendOtp,
