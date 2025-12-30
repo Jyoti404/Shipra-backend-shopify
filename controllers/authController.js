@@ -290,7 +290,7 @@ const verifyOtp = async (req, res) => {
           shopifyCustomer.default_address?.city ||
           null,
         shopifyCustomerId: shopifyCustomer.id,
-        role: "buyer",
+        role: "user",
       });
     } else {
       // 🛡️ Backfill missing Shopify ID (very important)
