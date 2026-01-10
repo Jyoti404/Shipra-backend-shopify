@@ -3,12 +3,12 @@ const dotenv = require("dotenv");
 const connectDB = require("./config/database");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
-
+// const fcmRoutes = require("./routes/fcm");
 const authRouter = require("./routes/authRoutes");
 // const productRoutes = require("./routes/productRoutes");
 // const cartRoutes = require("./routes/cartRoutes");
 // const orderRoutes = require("./routes/orderRoutes");
-// const wishlistRoutes = require("./routes/wishlistRoutes")
+const wishlistRoutes = require("./routes/wishlistRoutes")
 // const shopifyRoutes = require("./routes/shopifyRoutes"); // shopify routes
 // const goaffproRoutes = require("./routes/goaffpro"); // GoAffPro routes
 // const delhiveryRoutes = require("./routes/delhiveryRoutes"); // delhivery routes
@@ -36,10 +36,10 @@ app.use(limiter);
 // Mount routes
 app.use("/api/auth", authRouter);
 app.use('/api/customer', customerRoutes);
-// app.use("/api/wishlist", wishlistRoutes);
-// app.use('/api/feedback', feedbackRoutes);
+app.use("/api/wishlist", wishlistRoutes);
+// app.use('/api/fcm', fcmRoutes);
 // app.use('/api/orders', orderRoutes); 
-
+require("./services/abandonedCart");
 
 // Checking is API live
 app.get("/", (req, res) => {

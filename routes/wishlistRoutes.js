@@ -1,20 +1,15 @@
-// wishlistRoutes.js
-
 const express = require("express");
 const router = express.Router();
+const { protect } = require("../middlewares/authMiddleware");
 const {
   addToWishlist,
-  getWishlist,
   removeFromWishlist,
+  getWishlist,
 } = require("../controllers/wishlistController");
-const { protect, authorizeRole } = require("../middlewares/authMiddleware");
 
-// All routes protected for buyers only
-// router.use(protect);
-router.use(protect, authorizeRole("buyer"));
-
-router.post("/", addToWishlist);
-router.get("/", getWishlist);
-router.delete("/:productId", removeFromWishlist);
+// All wishlist routes are protected
+router.get("/", protect, getWishlist);
+router.post("/add", protect, addToWishlist);
+router.delete("/remove/:productId", protect, removeFromWishlist);
 
 module.exports = router;

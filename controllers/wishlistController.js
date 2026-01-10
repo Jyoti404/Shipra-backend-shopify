@@ -1,61 +1,62 @@
-// server/controllers/wishlistController.js
+const Wishlist = require('../models/Wishlist');
 
-const Wishlist = require("../models/Wishlist");
-
-//  Add product to wishlist
-//  POST /api/wishlist
+// 1. ADD to Wishlist
 exports.addToWishlist = async (req, res) => {
-  const userId = req.user._id;
-  const { productId } = req.body;
-
   try {
-    let wishlist = await Wishlist.findOne({ user: userId });
+    const { shopifyProductId } = req.body;
+    const userId = req.user.id;
 
-    if (!wishlist) {
-      wishlist = new Wishlist({ user: userId, products: [productId] });
-    } else {
-      if (wishlist.products.includes(productId)) {
-        return res.status(400).json({ message: "Product already in wishlist" });
-      }
-      wishlist.products.push(productId);
+    // 1. Validation: Don't save if the ID is missing
+    if (!shopifyProductId) {
+      return res.status(400).json({ message: "shopifyProductId is required" });
     }
 
-    await wishlist.save();
-    res.status(200).json({ message: "Product added to wishlist", wishlist });
-  } catch (error) {
-    res.status(500).json({ message: "Failed to add", error: error.message });
-  }
-};
-
-//  Get wishlist
-//  GET /api/wishlist
-exports.getWishlist = async (req, res) => {
-  try {
-    const wishlist = await Wishlist.findOne({ user: req.user._id }).populate(
-      "products"
+    // 2. Use $addToSet to prevent duplicate items for the same product
+    const wishlist = await Wishlist.findOneAndUpdate(
+      { userId },
+      { $addToSet: { products: { shopifyProductId } } },
+      { upsert: true, new: true }
     );
-    res.status(200).json(wishlist || { products: [] });
+
+    res.status(200).json(wishlist);
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch", error: error.message });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
-//  Remove product from wishlist
-//  DELETE /api/wishlist/:productId
+// 2. REMOVE from Wishlist
 exports.removeFromWishlist = async (req, res) => {
   try {
-    const wishlist = await Wishlist.findOne({ user: req.user._id });
+const { productId } = req.params;
+    const userId = req.user.id;
 
-    if (!wishlist)
-      return res.status(404).json({ message: "Wishlist not found" });
-
-    wishlist.products = wishlist.products.filter(
-      (prd) => prd.toString() !== req.params.productId
+    // $pull removes the specific object from the products array
+    const wishlist = await Wishlist.findOneAndUpdate(
+      { userId },
+{ $pull: { products: { shopifyProductId: productId } } },
+      { new: true }
     );
-
-    await wishlist.save();
+if (!wishlist) {
+      return res.status(404).json({ message: "Wishlist not found" });
+    }
     res.status(200).json({ message: "Product removed", wishlist });
   } catch (error) {
-    res.status(500).json({ message: "Failed to remove", error: error.message });
+    res.status(500).json({ message: "Error removing from wishlist", error: error.message });
+  }
+};
+
+// 3. FETCH User Wishlist
+exports.getWishlist = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const wishlist = await Wishlist.findOne({ userId });
+
+    if (!wishlist) {
+      return res.status(200).json({ products: [] });
+    }
+
+    res.status(200).json(wishlist);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching wishlist", error: error.message });
   }
 };

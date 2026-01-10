@@ -7,15 +7,12 @@ exports.submitFeedback = async (req, res) => {
     if (!type || !message) {
       return res.status(400).json({ message: "Type and message are required." });
     }
-
     const feedback = new Feedback({
       type,
       category: type === "general" ? category : null,
       message,
     });
-
     await feedback.save();
-
     res.status(200).json({ message: "Feedback submitted successfully!" });
   } catch (error) {
     console.error("Error submitting feedback:", error);
