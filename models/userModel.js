@@ -9,6 +9,7 @@ address: { type: String, trim: true, default: null },
 shopifyCustomerId: { type: String, default: null },
 role: { type: String, enum: ['user', 'admin'], default: 'user' },
 isActive: { type: Boolean, default: true },
+fcm_token: { type: String, default: null },
 wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
 }, { timestamps: true });
 

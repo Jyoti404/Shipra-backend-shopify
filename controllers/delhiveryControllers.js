@@ -49,7 +49,6 @@ const createShipment = async (req, res) => {
         },
       }
     );
-
     res.json(response.data);
   } catch (error) {
     console.error(error.response?.data || error.message);

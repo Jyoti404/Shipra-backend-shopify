@@ -3,7 +3,7 @@ const { parsePhoneNumberFromString } = require("libphonenumber-js");
 
 const shopDomain = process.env.SHOPIFY_STORE_URL;
 const accessToken = process.env.SHOPIFY_ADMIN_API_TOKEN;
-const apiVersion = "2023-10";
+const apiVersion = "2024-10";
 
 //  Helper: format phone to E.164
 function formatPhone(phone, defaultCountry = "IN") {

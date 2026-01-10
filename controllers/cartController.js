@@ -1,6 +1,6 @@
 // server/controllers/cartController.js
 
-const Cart = require("../models/cartModel");
+const Cart = require("../models/CartModel");
 
 //  Add or update product in cart
 //  POST /api/cart
